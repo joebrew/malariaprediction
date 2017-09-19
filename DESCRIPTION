@@ -1,0 +1,14 @@
+Package: malariaprediction
+Title: The malaria elimination prediction market
+Version: 0.0.0.9000
+Authors@R: person("Joe", "Brew", email = "joebrew@gmail.com", role = c("aut", "cre"))
+Description: This package handles the entire data pipeline for the reading,
+    processing, analysis and writing of papers related to the Malaria elimination prediction market
+Depends:
+    R (>= 3.4.1)
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Suggests:
+    testthat
+RoxygenNote: 5.0.1
