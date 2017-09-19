@@ -4,8 +4,8 @@
 \alias{make_offer}
 \title{Make an offer to sell or buy a statement}
 \usage{
-make_offer(users = NULL, user_id = 1, event_id = 1, shares = 1,
-  price = 50, yes = 1)
+make_offer(users = NULL, transactions = NULL, user_id = 1, event_id = 1,
+  shares = 1, price = 50, yes = 1)
 }
 \arguments{
 \item{users}{The users table}

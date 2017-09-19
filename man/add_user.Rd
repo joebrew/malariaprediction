@@ -6,8 +6,7 @@
 \usage{
 add_user(data = NULL, user_id = 1, name = "John Doe",
   email = "joebrew@gmail.com", username = "username",
-  password = "password", amount = 100, amount_invested = 0,
-  amount_offered = 0)
+  password = "password", amount = 100)
 }
 \arguments{
 \item{data}{A dataframe}
@@ -23,10 +22,6 @@ add_user(data = NULL, user_id = 1, name = "John Doe",
 \item{password}{A password}
 
 \item{amount}{An amount}
-
-\item{amount_invested}{An amount invested}
-
-\item{amount_offered}{An amount offered}
 }
 \value{
 A row added to the corresponding google sheet

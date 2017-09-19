@@ -11,6 +11,7 @@
 #' @export
 
 make_offer <- function(users = NULL,
+                       transactions = NULL,
                        user_id = 1,
                        event_id = 1,
                        shares = 1,
@@ -23,34 +24,44 @@ make_offer <- function(users = NULL,
   if(is.null(users)){
     users <- load_table('users') 
   }
-  users <- users %>%
+  if(is.null(transactions)){
+    transactions <- load_table('transactions') 
+  }
+  x <- users %>%
     filter(user_id == this_user)
+  # update users
+  x <- update_users(users = x,
+                    transactions = transactions)
   # Ensure that there is enough to offer
-  available <- users$amount - users$amount_invested - users$amount_offered
-  if(available < (price * shares)){
-    stop('Not enough available funds to make this offer.')
-  }
-  # Put the data in a dataframe
-  data <- data_frame(user_id,
-                     event_id,
-                     price,
-                     yes,
-                     valid = 1)
-  if(shares > 1){
-    new_data <- list()
-    for(i in 1:shares){
-      new_data[[i]] <- data
+  available <- x$amount - x$amount_invested - x$amount_offered
+  if(available >= (price * shares)){
+    # Put the data in a dataframe
+    data <- data_frame(user_id,
+                       event_id,
+                       price,
+                       yes,
+                       valid = 1,
+                       timestamp = Sys.time())
+    if(shares > 1){
+      new_data <- list()
+      for(i in 1:shares){
+        new_data[[i]] <- data
+      }
+      data <- bind_rows(new_data)
     }
-    data <- bind_rows(new_data)
+    
+    
+    # Grab the Google Sheet
+    sheet <- gs_title('offers_malariaprediction')
+    # Add the new offer
+    for (i in 1:nrow(data)){
+      message('Adding row ', i, ' of ', nrow(data))
+      gs_add_row(ss = sheet, 
+                 input = data[i,])
+    }
+  } else {
+    message('Offer not made. Insufficient funds.')
+    
   }
   
-  
-  # Grab the Google Sheet
-  sheet <- gs_title('offers_malariaprediction')
-  # Add the new offer
-  for (i in 1:nrow(data)){
-    message('Adding row ', i, ' of ', nrow(data))
-    gs_add_row(ss = sheet, 
-               input = data[i,])
-  }
 }

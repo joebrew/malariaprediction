@@ -5,9 +5,6 @@
 #' @export
 
 transact <- function() {
-  # if(is.null(table_keys)){
-  #   table_keys <- get_table_keys()
-  # }
   require(googlesheets)
   require(dplyr)
   # Get some tables
@@ -59,7 +56,8 @@ transact <- function() {
                                 event_id = event_ids[i],
                                 to = deal_yes_id,
                                 from = deal_no_id,
-                                price = the_price),
+                                price = the_price,
+                                timestamp = Sys.time()),
               table = 'transactions')
       # And update the users table accordingly
       these_changes <- users$user_id %in% c(deal_no_id,
@@ -83,27 +81,26 @@ transact <- function() {
                              offers$valid == 1]))
       
     }
-    
-    # Having modified the users, and offers tables
-    # replace them all on google sheets
-    # (don't need to do this to transactions, since they were just
-    # added to, not modified)
-    if(any(ever_deal)){ # only overwrite if changes were made
-      offers$temp_id <- NULL
-      overwrite_these <- c('users', 'offers')
-      for (i in 1:length(overwrite_these)){
-        message('Overwriting the ', overwrite_these[i], ' table.')
-        # Write a temporary file
-        readr::write_csv(get(overwrite_these[i]),
-                         'temp.csv')
-        gs_upload(file = 'temp.csv',
-                  sheet_title = paste0(overwrite_these[i], '_malariaprediction'),
-                  overwrite = TRUE)
-        file.remove('temp.csv')
-      }
-    } else {
-      message('No deals were made. Not overwriting')
-    }
-
   }  
+  # Having modified the offers tables
+  # replace it  on google sheets
+  # (don't need to do this to transactions, since they were just
+  # added to, not modified)
+  if(any(ever_deal)){ # only overwrite if changes were made
+    offers$temp_id <- NULL
+    overwrite_these <- c('offers')
+    for (i in 1:length(overwrite_these)){
+      message('Overwriting the ', overwrite_these[i], ' table.')
+      # Write a temporary file
+      readr::write_csv(get(overwrite_these[i]),
+                       'temp.csv')
+      gs_upload(file = 'temp.csv',
+                sheet_title = paste0(overwrite_these[i], '_malariaprediction'),
+                overwrite = TRUE)
+      file.remove('temp.csv')
+    }
+  } else {
+    message('No deals were made. Not overwriting anything.')
+  }
+  message('Done with transaction.')
 }
