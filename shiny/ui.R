@@ -1,5 +1,6 @@
 library(shiny)
 library(ggplot2)
+library(malariaprediction)
 
 shinyUI(fluidPage(
   titlePanel("Malaria Eradication Prediction Market"),
