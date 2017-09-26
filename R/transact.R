@@ -11,6 +11,10 @@ transact <- function() {
   offers <- load_table('offers')
   transactions <- load_table('transactions')
   users <- load_table('users')
+  # Update users
+  users <- update_users(users = users,
+                        transactions = transactions,
+                        offers = offers)
   # Create a temporary id in offers
   offers$temp_id <- 1:nrow(offers)
   # Remove all old offers
@@ -52,7 +56,7 @@ transact <- function() {
                                                  deal_yes)] <- 0
       # Then, create a transaction
       the_price <- ys$price[ys$temp_id == deal_yes]
-      add_row(data = data_frame(transaction_id = max(transactions$transaction_id) + 1,
+      malariaprediction::add_row(data = data_frame(transaction_id = max(transactions$transaction_id) + 1,
                                 event_id = event_ids[i],
                                 to = deal_yes_id,
                                 from = deal_no_id,

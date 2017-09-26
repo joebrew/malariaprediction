@@ -61,7 +61,5 @@ make_offer <- function(users = NULL,
     }
   } else {
     message('Offer not made. Insufficient funds.')
-    
   }
-  
 }
