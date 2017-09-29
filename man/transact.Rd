@@ -4,7 +4,14 @@
 \alias{transact}
 \title{Transact}
 \usage{
-transact()
+transact(upload = TRUE, spread_out_time = FALSE)
+}
+\arguments{
+\item{upload}{Whether to upload each new row. Alternatively, finishes all the
+transactions and then bulk uploads transactions, overwriting the old table}
+
+\item{spread_out_time}{Whether to spread out the time a little bit (useful for juicing the market, and
+only appliable if upload = FALSE)}
 }
 \value{
 transactions, users and offers tables updated

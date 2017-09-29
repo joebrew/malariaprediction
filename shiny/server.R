@@ -5,7 +5,7 @@ library(ggplot2)
 
 pok <- F
 event_id <- function(){'hey'}
-shinyServer(function(input, output){
+shinyServer(function(input, output, session){
   
   output$in.pss   <- 
     renderUI({ input$action;  #input$pss;
@@ -75,7 +75,7 @@ shinyServer(function(input, output){
     renderText({
       input$action;  #input$pss; 
       if(pok){
-        return(paste0("Select 'yes' above to make an offer to bet that the event will occur. Select 'no' to make an offer to bet that the event will NOT occur. After that, select your perceived probability (which corresponds to the price of your offer) below."))
+        return(paste0("Select 'yes' above to make an offer to bet that the event will occur. Select 'no' to make an offer to bet that the event will NOT occur. After that, select your perceived probability (which corresponds to the price of your offer) below. For example, if you select 'yes' and 60%, this means you are willing to bet 60 points that the event will occur; if you select 'no' and 82%, this means that you are willing to bet 82 points that the event will not occur. After the event resolution (ie, it occurs or not), you will be given 100 points if correct, and 0 if incorrect."))
       } else {
         return(NULL)
       }
@@ -86,6 +86,16 @@ shinyServer(function(input, output){
       input$action;  #input$pss; 
       if(pok){
         return('Market overview')
+      } else {
+        return(NULL)
+      }
+    })
+  
+  output$spread_text <-
+    renderText({
+      input$action;  #input$pss; 
+      if(pok){
+        return('Market spread')
       } else {
         return(NULL)
       }
@@ -142,7 +152,6 @@ shinyServer(function(input, output){
       return(0)
     }
   })
-  
   event_id <- reactive({
     input$action
     if(pok){
@@ -155,9 +164,6 @@ shinyServer(function(input, output){
       return(0)
     }
   })
-  
-  
-  
   shares <- reactive({
     input$action
     if(pok){
@@ -182,7 +188,8 @@ shinyServer(function(input, output){
       return(0)
     }
   })
-
+  
+  
   output$market_plot <- renderPlot({
     g <- ggplot() +
       theme_publication() +
@@ -201,129 +208,211 @@ shinyServer(function(input, output){
     } else {
       return(NULL)
     }
+  })
+  
+  output$all_markets_trajectories <- renderPlot({
+      plot_data <- transactions %>%
+        left_join(events %>% dplyr::select(event_id, short_statement)) %>%
+        arrange(timestamp)
+      plot_data$short_statement <- 
+        gsub(' malaria ', ' ', plot_data$short_statement)
+      plot_data$short_statement <-
+        gsub(' in ', ' ', plot_data$short_statement)
+      plot_data$short_statement <-
+        gsub(' by ', ' ', plot_data$short_statement)
+      plot_data$short_statement <- 
+        gsub('Malaria elimination ',
+             '',
+             plot_data$short_statement)
+      plot_data <- plot_data %>% filter(!is.na(short_statement))
+      g <- ggplot(data = plot_data,
+                  aes(x = timestamp,
+                      y = price)) +
+        geom_line() +
+        theme_publication() +
+        facet_wrap(~short_statement) +
+        labs(x = '',
+             y = '%') +
+        geom_smooth() +
+        theme(axis.text.x = element_text(angle = 90)) +
+        ylim(0, 100)
+      return(g)
+  })
+    
+    output$spread_plot <- renderPlot({
+        g <- get_spread(offers = offers,
+                        events = events,
+                        plot = TRUE)
+        return(g)
+    })
+    
+    output$spread_plot_1 <- renderPlot({
+      g <- ggplot() +
+        theme_publication() +
+        labs(title = '')
+      input$action
+      if(pok){
+        if(!is.null(input$event)){
+          eid <- event_id()
+        } else {
+          eid <- 999
+        }
+        
+        g <- get_spread(offers = offers,
+                        events = events,
+                        eid = eid)
+        return(g)
+      } else {
+        return(NULL)
+      }
+    })
+    
+    # Create offer if need be
+    observeEvent(eventExpr = input$offer,
+                 {
+                   message('User is ', user_id())
+                   message('Event is ', event_id())
+                   message('Shares are ', shares())
+                   message('Price is ', price())
+                   message('Yes is ', yes())
+                   handlerExpr = make_offer_and_transact(user_id = user_id(),
+                                                         event_id = event_id(),
+                                                         shares = shares(),
+                                                         price = price(),
+                                                         yes = yes())})
+    
+    # Create a reactive users object
+    all_users <- reactive({
+      input$action
+      if(pok){
+        x <- update_users()
+        return(x)
+      } else {
+        return(NULL)
+      }
+    })
+    
+    
+    # Create a reactive user object
+    this_user <- reactive({
+      input$action
+      if(pok){
+        x <- all_users()
+        uid <- users$user_id[users$username == input$user]
+        out <- x %>%
+          filter(user_id == uid)
+        return(out)
+      } else {
+        return(NULL)
+      }
+    })
+    
+    # Create a table of this user
+    output$this_user_table <- renderTable({
+      input$action
+      if(pok){
+        x <- this_user()
+        x
+      } else {
+        return(NULL)
+      }
+    })
+    
+    # Create a table of current offers
+    output$current_offers <- renderTable({
+      input$action
+      if(pok){
+        if(!is.null(input$event)){
+          eid <- event_id()
+        } else {
+          eid <- 999
+        }
+        offs <- get_spread(offers = offers,
+                        events = events,
+                        eid = eid, 
+                        plot = FALSE)
+        offs <- offs %>%
+          tidyr::gather(key,
+                        value,
+                        last_yes:last_no)
+        offs <- offs %>%
+          mutate(x = ifelse(key == 'last_yes', value,
+                            ifelse(key == 'last_no', 100-value, NA))) %>%
+          summarise(`Highest buy offer` = x[key == 'last_yes'],
+                    `Lowest sell offer` = x[key == 'last_no'])
+        return(offs)
+      } else {
+        return(NULL)
+      }
+    })
+    
+    # Create a table of all markets
+    output$all_markets_table <- renderDataTable({
+        out <- get_spread(events = events, plot = FALSE)
+        if(nrow(out) == 0){
+          out <- data_frame(`All markets` = 'None')
+        }
+        return(out)
+    })
+    
+    # Create a table for export
+    raw_data <- reactive({
+      has_transactions <- FALSE
+      if(exists('transactions')){
+        if(!is.null(transactions)){
+          has_transactions <- TRUE
+        }
+      }
+      if(!exists('events')){
+        has_transactions <- FALSE
+      }
+      if(has_transactions){
+        out <- transactions %>%
+          dplyr::select(event_id,
+                        price,
+                        timestamp) %>%
+          left_join(events %>%
+                      dplyr::select(event_id,
+                                    short_statement,
+                                    statement,
+                                    close_date),
+                    by = 'event_id') %>%
+          arrange(event_id,
+                  timestamp)
+        return(out)
+      } else {
+        return(NULL)
+      }
+    })
+    
+    
+    output$downloadData <- downloadHandler(
+      filename = function() {
+        paste('raw_data', ".csv", sep = "")
+      },
+      content = function(file) {
+        write.csv(raw_data(), 
+                  file, 
+                  row.names = FALSE)
+      }
+    )
+    
+    output$raw_data_table <- renderDataTable({
+      raw_data()
+    })
+    
+    # Countdown timer
+    end_date <- reactive({
+      input$action
+      if(pok){
+        return(events$close_date[events$short_statement == input$event][1])
+      } else {
+        return(NULL)
+      }
+    }) 
+    output$time_left <- renderText({
+      invalidateLater(1000, session)
+      round(difftime(end_date(), Sys.time(), units='secs'))
+    })
     
   })
-  
-  # Create offer if need be
-  observeEvent(eventExpr = input$offer,
-               {
-                 message('User is ', user_id())
-                 message('Event is ', event_id())
-                 message('Shares are ', shares())
-                 message('Price is ', price())
-                 message('Yes is ', yes())
-                 # handlerExpr = make_offer(user_id = user_id(),
-                 #                          event_id = event_id(),
-                 #                          shares = shares(),
-                 #                          price = price(),
-                 #                          yes = yes())
-                 handlerExpr = make_offer_and_transact(user_id = user_id(),
-                                          event_id = event_id(),
-                                          shares = shares(),
-                                          price = price(),
-                                          yes = yes())
-               }
-                )
-  
-  # Create a reactive users object
-  all_users <- reactive({
-    input$action
-    if(pok){
-      x <- update_users()
-      return(x)
-    } else {
-      return(NULL)
-    }
-  })
-  
-  
-  # Create a reactive user object
-  this_user <- reactive({
-    input$action
-    if(pok){
-      x <- all_users()
-      uid <- users$user_id[users$username == input$user]
-      out <- x %>%
-        filter(user_id == uid)
-      return(out)
-    } else {
-      return(NULL)
-    }
-  })
-  
-  # Create a table of this user
-  output$this_user_table <- renderTable({
-    input$action
-    if(pok){
-      x <- this_user()
-      x
-    } else {
-      return(NULL)
-    }
-  })
-  
-  # Create a table of current offers
-  output$current_offers <- renderTable({
-    input$action
-    if(pok){
-      if(!is.null(input$event)){
-        eid <- event_id()
-      } else {
-        eid <- 999
-      }
-      
-      offs <- offers %>% 
-        filter(event_id == eid, 
-               valid == 1) %>%
-        dplyr::select(price, yes, timestamp) %>%
-        group_by(price, yes) %>%
-        summarise(offers = n()) %>%
-        ungroup %>%
-        mutate(`Current offers` = paste0(offers,
-                                    ' offer',
-                                    ifelse(offers == 1, '', 's'),
-                                    ' to ',
-                                    ifelse(yes == 0, 'sell', 'buy'),
-                                    ' for ',
-                                    price,
-                                    ' points or ',
-                                    ifelse(yes == 0, 'greater', 'less'))) %>%
-        dplyr::select(`Current offers`)
-      if(nrow(offs) == 0){
-        offs <- data_frame(`Current offers` = 'None')
-      }
-      return(offs)
-    } else {
-      return(NULL)
-    }
-  })
-  
-  output$plot1 = renderPlot(
-    {
-      input$action
-      if(pok){
-        return(
-          barplot(1:10)
-        )
-      } else {
-        return(NULL)
-      }
-    }
-  )
-  
-  output$plot2 = renderPlot(
-    {
-      input$action
-      if(pok){
-        return(
-          barplot(1:100)
-        )
-      } else {
-        return(NULL)
-      }
-    }
-  )
-  
-  
-  
-})

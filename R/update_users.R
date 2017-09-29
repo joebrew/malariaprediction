@@ -29,7 +29,9 @@ update_users <- function(users = NULL,
     summarise(amount_invested =  sum(price)) %>%
     bind_rows(transactions %>%
               group_by(user_id = from) %>%
-                summarise(amount_invested = sum(price))) %>%
+                summarise(n = n(),
+                          amount_invested = sum(price)) %>%
+                mutate(amount_invested = (100 * n) - amount_invested)) %>%
     group_by(user_id) %>%
     summarise(amount_invested = sum(amount_invested))
   # Get how much is currently offered

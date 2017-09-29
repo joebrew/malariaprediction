@@ -4,12 +4,14 @@
 #' @param offers An offers table
 #' @param events An events table
 #' @param plot Whether to plot or not
+#' @param eid Optional, an event id to filter by
 #' @return A row added to the corresponding google sheet
 #' @export
 
 get_spread <- function(offers = NULL,
                        events = NULL,
-                       plot = TRUE){
+                       plot = TRUE,
+                       eid = NULL){
   require(ggplot2)
   require(dplyr)
   require(tidyr)
@@ -36,10 +38,21 @@ get_spread <- function(offers = NULL,
               last_no = last_offer[yes == 0]) %>%
     left_join(events %>% dplyr::select(event_id, short_statement),
               by = 'event_id')
+  out <- out %>%
+    mutate(last_no= 100 - last_no) %>%
+    filter(!is.na(event_id))
+  if(!is.null(eid)){
+    out <- out %>%
+      filter(event_id == eid)
+  }
   if(plot){
     plot_data <- out %>%
       gather(key, value, last_yes:last_no) %>%
       mutate(key = gsub('last_', '', key))
+    plot_data <-
+      plot_data %>%
+      mutate(key = ifelse(key == 'yes', 'Buy (yes) offer',
+                          'Sell (no) offer')) 
     out <-
       ggplot(data = plot_data) +
       geom_point(aes(x = short_statement,
@@ -59,7 +72,8 @@ get_spread <- function(offers = NULL,
                          values = c('red', 'green'),
                          guide = guide_legend(ncol = 1,
                                               reverse = TRUE)) +
-      theme(legend.position = 'right')
+      theme(legend.position = 'right') +
+      ylim(0, 100)
   
   }
   return(out)
