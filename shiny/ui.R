@@ -1,10 +1,11 @@
+library(dplyr)
+library(Hmisc)
 library(shiny)
 library(ggplot2)
-library(malariaprediction)
 library(shinydashboard)
 
 # Define the sidebar
-sidebar <- 
+sidebar <-
   dashboardSidebar(
     sidebarMenu(
       menuItem("About", icon = icon("th"), tabName = "what",
@@ -13,7 +14,7 @@ sidebar <-
                badgeLabel = "place bets", badgeColor = "red"),
       menuItem('Data analysis', icon = icon('th'), tabName = 'analysis',
                badgeLabel = 'explore', badgeColor = 'blue')),
-    
+
     uiOutput("in.user"),
     uiOutput("in.pss"),
     uiOutput("in.event"),
@@ -24,7 +25,7 @@ sidebar <-
     uiOutput('in.action'),
     uiOutput('in.offer'),
     helpText(textOutput('yesno_explanation')),
-    menuItem("Source code", icon = icon("file-code-o"), 
+    menuItem("Source code", icon = icon("file-code-o"),
              href = "https://github.com/rstudio/shinydashboard/"))
 
 # Define the body
@@ -39,7 +40,7 @@ body <- dashboardBody(
               column(6,
                      h3(textOutput('spread_text')),
                      plotOutput('spread_plot_1'))),
-            fluidRow(shinydashboard::valueBox(textOutput('time_left'), 
+            fluidRow(shinydashboard::valueBox(textOutput('time_left'),
                                               subtitle = 'Seconds until market resolution', icon = icon("fa-flag"),
                             color = 'red'),
                             shinydashboard::valueBox(150, subtitle = 'B', icon = icon("fa-stethoscope"),

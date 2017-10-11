@@ -1,6 +1,7 @@
 library(shiny)
-library(malariaprediction)
 library(dplyr)
+library(ggthemes)
+library(malariaprediction)
 
 users <- load_table('users')
 events <- load_table('events')
