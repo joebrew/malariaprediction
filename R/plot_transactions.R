@@ -1,7 +1,8 @@
 #' Plot transactions for an event
-#' 
+#'
 #' Plot transactions for a certain event
-#' @param event_id
+#' @param event_id an event id
+#' @param transactions a transactions table
 #' @return A row added to the corresponding google sheet
 #' @export
 
@@ -23,7 +24,7 @@ plot_transactions <- function(event_id,
       geom_point(alpha = 0.8) +
       geom_line(alpha = 0.7) +
       geom_line(stat="smooth",
-                method = "lm", 
+                method = "lm",
                 formula = y ~ 0 + I(1/x) + I((x-1)/x),
                 size = 1.5,
                 color = 'blue',

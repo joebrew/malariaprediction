@@ -6,6 +6,11 @@
 \usage{
 plot_transactions(event_id, transactions = NULL)
 }
+\arguments{
+\item{event_id}{an event id}
+
+\item{transactions}{a transactions table}
+}
 \value{
 A row added to the corresponding google sheet
 }
