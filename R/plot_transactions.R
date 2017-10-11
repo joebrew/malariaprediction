@@ -8,6 +8,8 @@
 
 plot_transactions <- function(event_id,
                               transactions = NULL){
+  require(dplyr)
+  require(ggplot2)
   if(is.null(transactions)){
     transactions <- load_table('transactions')
   }

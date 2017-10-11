@@ -10,9 +10,14 @@ Imports:
 	dplyr,
     ggthemes,
     ggplot2,
+    grid,
     shiny,
     shinydashboard,
-    Hmisc
+    googlesheets,
+    Hmisc,
+    tidyr,
+    progress,
+    markdown
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true

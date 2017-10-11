@@ -3,6 +3,7 @@ library(Hmisc)
 library(shiny)
 library(ggplot2)
 library(shinydashboard)
+library(googlesheets)
 
 # Define the sidebar
 sidebar <-
