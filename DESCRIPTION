@@ -6,6 +6,13 @@ Description: This package handles the entire data pipeline for the reading,
     processing, analysis and writing of papers related to the Malaria elimination prediction market
 Depends:
     R (>= 3.4.1)
+Imports:
+	dplyr,
+    ggthemes,
+    ggplot2,
+    shiny,
+    shinydashboard,
+    Hmisc
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
