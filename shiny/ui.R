@@ -4,6 +4,7 @@ library(shiny)
 library(ggplot2)
 library(shinydashboard)
 library(googlesheets)
+library(highcharter)
 
 # Define the sidebar
 sidebar <-
@@ -18,14 +19,8 @@ sidebar <-
 
     uiOutput("in.user"),
     uiOutput("in.pss"),
-    uiOutput("in.event"),
-    h4(textOutput('event_full_header')),
-    uiOutput("in.yesno"),
-    uiOutput("in.prob"),
-    uiOutput("in.shares"),
     uiOutput('in.action'),
-    uiOutput('in.offer'),
-    helpText(textOutput('yesno_explanation')),
+    h4(textOutput('go_forward')),
     menuItem("Source code", icon = icon("file-code-o"),
              href = "https://github.com/rstudio/shinydashboard/"))
 
@@ -33,6 +28,16 @@ sidebar <-
 body <- dashboardBody(
   tabItems(
     tabItem(tabName = 'buy_and_sell',
+            fluidRow(column(5,
+                            uiOutput("in.event"),
+                            #h4(textOutput('event_full_header')),
+                            uiOutput("in.yesno"),
+                            uiOutput('in.offer')),
+                     column(7,
+                            uiOutput("in.prob"),
+                            uiOutput("in.shares"))),
+            fluidRow(column(12,
+                            helpText(textOutput('yesno_explanation')))),
             fluidRow(h2(textOutput('event_full_statement'))),
             fluidRow(
               column(6,
@@ -44,9 +49,11 @@ body <- dashboardBody(
             fluidRow(shinydashboard::valueBox(textOutput('time_left'),
                                               subtitle = 'Seconds until market resolution', icon = icon("fa-flag"),
                             color = 'red'),
-                            shinydashboard::valueBox(150, subtitle = 'B', icon = icon("fa-stethoscope"),
+                            shinydashboard::valueBox(textOutput('this_user_money'),
+                                                     subtitle = 'Amount available for investing', icon = icon("fa-stethoscope"),
                             color = 'yellow'),
-                            shinydashboard::valueBox(200, subtitle = 'C', icon = icon("fa-binoculars"),
+                            shinydashboard::valueBox(textOutput('this_user_invested'),
+                                                     subtitle = 'Amount already invested', icon = icon("fa-binoculars"),
                             color = 'green')),
             fluidRow(
               column(6,

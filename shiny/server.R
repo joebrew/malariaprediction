@@ -50,6 +50,16 @@ shinyServer(function(input, output, session){
       }
     })
 
+  output$go_forward <-
+    renderText({
+      input$action;  #input$pss;
+      if(pok){
+        return('Now click on "Buy and Sell" above!\n\n')
+      } else {
+        return(NULL)
+      }
+    })
+
   output$event_full_statement <-
     renderText({
       input$action;  #input$pss;
@@ -306,6 +316,29 @@ shinyServer(function(input, output, session){
       }
     })
 
+    # Create reactive text of money available
+    output$this_user_money <- renderText({
+      input$action
+      if(pok){
+        out <- this_user()$amount[1]
+        return(out)
+      } else {
+        return(NULL)
+      }
+    })
+
+    # Create reactive text of money invested
+    output$this_user_invested <- renderText({
+      input$action
+      if(pok){
+        out <- 1000 - this_user()$amount[1]
+        return(out)
+      } else {
+        return(NULL)
+      }
+    })
+
+
     # Create a table of this user
     output$this_user_table <- renderTable({
       input$action
@@ -410,8 +443,10 @@ shinyServer(function(input, output, session){
       }
     })
     output$time_left <- renderText({
+      number <- 0
+      number <- round(difftime(end_date(), Sys.time(), units='secs'))
       invalidateLater(1000, session)
-      round(difftime(end_date(), Sys.time(), units='secs'))
+      number
     })
 
   })

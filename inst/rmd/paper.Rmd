@@ -1,17 +1,10 @@
 ---
-title: Paper title
-csl: elsevier-harvard.csl
+title: "A prediction market for malaria elimination: harnessing the wisdom of crowds to inform health financing and policy"
 date: ''
-output:
-  html_document:
-    css: resources/style.css
-    pandoc_args:
-    - +RTS
-    - -K16000m
-    - -RTS
-    toc: yes
+output: 
   pdf_document:
-    toc: yes
+    includes:
+      in_header: preamble.sty
 fig_width: 4
 fig_height: 2.6
 bibliography: bibliography.bib
@@ -23,12 +16,10 @@ bibliography: bibliography.bib
 library(tidyverse)
 library(knitr)
 library(Hmisc)
-library(brew)
-library(maragra)
+library(malariaprediction)
 library(knitr)
 library(googleVis)
 library(RColorBrewer)
-op <- options(gvis.plot.tag='chart')
 
 ## Global options
 options(max.print="75")
@@ -43,24 +34,46 @@ opts_knit$set(width=75)
 ```
 
 
-<!-- <hr> -->
-<!-- <p style="text-align:left;"> -->
-<!-- [http://economicsofmalaria.com](http://economicsofmalaria.com) -->
-<!-- <span style="float:right;">joebrew@gmail.com</span> -->
-<!-- </p> -->
-<!-- <hr> -->
+\begin{center}
+\begin{large}
 
-```{r}
-barplot(1:10)
+```{r, results = 'asis', eval = TRUE}
+# malariaprediction::make_authors()
 ```
+
+\end{large}
+\end{center}
+
+\vspace{5mm}
+
+\begin{center}
+\textbf{Abstract}  
+\end{center}
+
+\vspace{5mm}
+\begin{center}
+\begin{changemargin}{3cm}{3cm} 
+
+Here goes some abstract text. Bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla .
+
+\end{changemargin}
+\end{center}
+
+
+
 
 # Introduction
 
-Some text goes here
+- Need for accurate information regarding malaria elimination's feasibility.  
+- Current sources of information are biased.  
+- Prediction market address those biases.
+
 
 # Methods
 
-Some text goes here
+We created
+
+All data processing and analysis were carried out in R [@R]. All code is freely available online [@brewgit].
 
 # Results
 
@@ -73,7 +86,7 @@ Some text goes here
 
 
 
-```{r include=FALSE}
+```{r, eval=FALSE}
 # automatically create a bib database for R packages
 knitr::write_bib(c(
   .packages(), 'knitr', 'rmarkdown'
@@ -82,4 +95,6 @@ knitr::write_bib(c(
 
 
 # References
+
+
 
